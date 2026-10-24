@@ -25,19 +25,19 @@ contract IntentRegistry is EIP712 {
             "Intent(address user,address inputToken,uint256 inputAmount,uint256 deadline,uint256 nonce,address outputToken,uint256 outputAmount,uint256 destinationChainId,address recipient)"
         );
 
-    mapping(address => uint256) public nonces;
+    mapping(address => mapping(uint256 => bool)) public nonceUsed;
 
     constructor() EIP712("IntentRegistry", "1") {}
 
     function fulfillIntent(
         Intent calldata intent,
         bytes memory signature
-    ) external {
+    ) external payable {
         require(block.timestamp <= intent.deadline, "Intent expired");
-        require(intent.nonce == ++nonces[intent.user], "Invalid nonce");
+        require(!nonceUsed[intent.user][intent.nonce], "Nonce already used");
+        nonceUsed[intent.user][intent.nonce] = true;
 
         bytes32 digest = getMessageHash(intent);
-
         address signer = digest.recover(signature);
         require(signer == intent.user, "Invalid signature");
 

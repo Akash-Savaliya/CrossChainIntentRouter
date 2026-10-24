@@ -19,7 +19,7 @@ contract TargetEscrow {
         address recipient,
         address token,
         uint256 amount
-    ) external {
+    ) external payable {
         require(!fulfilledOnTarget[intentHash], "Target already fulfilled");
         fulfilledOnTarget[intentHash] = true;
 
