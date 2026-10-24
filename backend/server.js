@@ -14,20 +14,21 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("Connected to MongoDB successfully!"))
     .catch((err) => console.error("MongoDB connection error:", err));
 
-const intentSchema = new mongoose.Schema({
-    user: String,
-    sourceChainId: String,
-    destinationChainId: String,
-    inputToken: String,
-    inputAmount: String,
-    outputToken: String,
-    outputAmount: String,
-    recipient: String,
-    nonce: String,
-    deadline: Number,
-    signature: String,
-    status: { type: String, default: "pending" }
-});
+    const intentSchema = new mongoose.Schema({
+        user: String,
+        sourceChainId: String,
+        destinationChainId: String,
+        inputToken: String,
+        inputAmount: String,
+        outputToken: String,
+        outputAmount: String,
+        recipient: String,
+        nonce: String,
+        deadline: Number,
+        signature: String,
+        intentIdHash: String,
+        status: { type: String, default: "pending" }
+    });
 
 const Intent = mongoose.model('Intent', intentSchema);
 
@@ -39,30 +40,60 @@ app.post('/api/intents', async (req, res) => {
     try {
         const { user, sourceChainId, destinationChainId, inputToken, inputAmount, outputToken, outputAmount, recipient, nonce, deadline, signature } = req.body;
 
-        const message = JSON.stringify({
+        const domain = {
+            name: 'IntentRegistry',
+            version: '1',
+            chainId: BigInt(sourceChainId),
+            verifyingContract: process.env.INTENT_REGISTRY_ADDRESS
+        };
+        
+        const types = {
+            Intent: [
+                { name: 'user', type: 'address' },
+                { name: 'inputToken', type: 'address' },
+                { name: 'inputAmount', type: 'uint256' },
+                { name: 'deadline', type: 'uint256' },
+                { name: 'nonce', type: 'uint256' },
+                { name: 'outputToken', type: 'address' },
+                { name: 'outputAmount', type: 'uint256' },
+                { name: 'destinationChainId', type: 'uint256' },
+                { name: 'recipient', type: 'address' }
+            ]
+        };
+        const value = {
             user,
-            sourceChainId,
-            destinationChainId,
             inputToken,
             inputAmount,
+            deadline,
+            nonce,
             outputToken,
             outputAmount,
-            recipient,
-            nonce,
-            deadline
-        });
+            destinationChainId,
+            recipient
+        };
 
-        const recoveredAddress = ethers.verifyMessage(message, signature);
-
-        if (recoveredAddress.toLowerCase() !== user.toLowerCase()) {
-            return res.status(400).json({ success: false, message: "Invalid cryptographic signature!" });
+        let recoveredAddress;
+        try {
+            recoveredAddress = ethers.verifyTypedData(domain, types, value, signature);
+        } catch (error) {
+            return res.status(400).json({ success: false, message: 'Invalid cryptographic signature!' });
         }
 
-        const newIntent = new Intent(req.body);
+        if (recoveredAddress.toLowerCase() !== user.toLowerCase()) {
+            return res.status(400).json({ success: false, message: 'Invalid cryptographic signature!' });
+        }
+
+        const intentHash = ethers.keccak256(ethers.toUtf8Bytes(nonce + user + recipient));
+
+        const newIntent = new Intent({
+            ...req.body,
+            intentIdHash: intentHash
+        });
+
         await newIntent.save();
 
-        console.log("Verified & Saved New Intent:", newIntent._id);
-        res.status(201).json({ success: true, message: "Intent verified and stored successfully!", intentId: newIntent._id });
+        console.log('Verified & Saved New Intent:', newIntent._id);
+        res.status(201).json({ success: true, message: 'Intent verified and stored successfully!', intentId: newIntent._id, intentIdHash: intentHash });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
