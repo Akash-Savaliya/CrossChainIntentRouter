@@ -41,9 +41,20 @@ async function startFullFlowSolverBot() {
                 return;
             }
 
-            console.log('\nFound ' + pendingIntents.length + ' pending intents');
+            console.log('Found ' + pendingIntents.length + ' pending intents');
+
+            const sourceNetwork = await sourceProvider.getNetwork();
+            const destinationNetwork = await destinationProvider.getNetwork();
 
             for (const intent of pendingIntents) {
+                if (
+                    BigInt(intent.sourceChainId) !== sourceNetwork.chainId ||
+                    BigInt(intent.destinationChainId) !== destinationNetwork.chainId
+                ) {
+                    console.log('Skipping intent ' + intent._id + ': chain id does not match solver RPCs');
+                    continue;
+                }
+
                 console.log('\nProcessing Intent ID: ' + intent._id);
                 let destinationFilled = false;
 
