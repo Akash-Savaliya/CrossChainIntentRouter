@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { CHAINS, CONTRACT_ADDRESS } from '../constants/config';
+import { CHAINS, CONTRACT_ADDRESS, DESTINATION_CHAINS, SOURCE_CHAINS } from '../constants/config';
 import { signIntent } from '../utils/eip712';
 import { submitIntentToBackend } from '../services/api';
 
@@ -62,7 +62,9 @@ export default function IntentForm({ account }) {
   }, [account]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    const nextValue = name === 'sourceChainId' || name === 'destinationChainId' ? Number(value) : value;
+    setFormData({ ...formData, [name]: nextValue });
   };
 
   const handleSubmit = async (e) => {
@@ -117,12 +119,20 @@ export default function IntentForm({ account }) {
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       <div>
-        <label>Source Chain ID:</label>
-        <input type="text" name="sourceChainId" value={formData.sourceChainId} onChange={handleChange} style={{ width: '100%', padding: '8px' }} />
+        <label>Source Chain:</label>
+        <select name="sourceChainId" value={formData.sourceChainId} onChange={handleChange} style={{ width: '100%', padding: '8px' }}>
+          {SOURCE_CHAINS.map((chain) => (
+            <option key={chain.id} value={chain.id}>{chain.name}</option>
+          ))}
+        </select>
       </div>
       <div>
-        <label>Destination Chain ID:</label>
-        <input type="text" name="destinationChainId" value={formData.destinationChainId} onChange={handleChange} style={{ width: '100%', padding: '8px' }} />
+        <label>Target Chain:</label>
+        <select name="destinationChainId" value={formData.destinationChainId} onChange={handleChange} style={{ width: '100%', padding: '8px' }}>
+          {DESTINATION_CHAINS.map((chain) => (
+            <option key={chain.id} value={chain.id}>{chain.name}</option>
+          ))}
+        </select>
       </div>
       <div>
         <label>Input Token Address:</label>
@@ -150,7 +160,7 @@ export default function IntentForm({ account }) {
 
       {statusMessage && (
         <div style={{ marginTop: '15px', padding: '10px', background: '#f8fafc', borderLeft: '4px solid #10b981' }}>
-          <p style={{ margin: 0 }}>{statusMessage}</p>
+          <p style={{margin: 0 }}>{statusMessage}</p>
         </div>
       )}
     </form>
