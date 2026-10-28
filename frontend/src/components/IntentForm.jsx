@@ -117,50 +117,50 @@ export default function IntentForm({ account }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      <div>
+    <form className="form" onSubmit={handleSubmit}>
+      <div className="field">
         <label>Source Chain:</label>
-        <select name="sourceChainId" value={formData.sourceChainId} onChange={handleChange} style={{ width: '100%', padding: '8px' }}>
+        <select name="sourceChainId" value={formData.sourceChainId} onChange={handleChange}>
           {SOURCE_CHAINS.map((chain) => (
             <option key={chain.id} value={chain.id}>{chain.name}</option>
           ))}
         </select>
       </div>
-      <div>
+      <div className="field">
         <label>Target Chain:</label>
-        <select name="destinationChainId" value={formData.destinationChainId} onChange={handleChange} style={{ width: '100%', padding: '8px' }}>
+        <select name="destinationChainId" value={formData.destinationChainId} onChange={handleChange}>
           {DESTINATION_CHAINS.map((chain) => (
             <option key={chain.id} value={chain.id}>{chain.name}</option>
           ))}
         </select>
       </div>
-      <div>
+      <div className="field">
         <label>Input Token Address:</label>
-        <input type="text" name="inputToken" value={formData.inputToken} onChange={handleChange} style={{ width: '100%', padding: '8px' }} />
+        <input type="text" name="inputToken" value={formData.inputToken} onChange={handleChange} />
       </div>
-      <div>
+      <div className="field">
         <label>Input Amount (Wei):</label>
-        <input type="text" name="inputAmount" value={formData.inputAmount} onChange={handleChange} style={{ width: '100%', padding: '8px' }} />
+        <input type="text" name="inputAmount" value={formData.inputAmount} onChange={handleChange} />
       </div>
-      <div>
+      <div className="field">
         <label>Output Token Address:</label>
-        <input type="text" name="outputToken" value={formData.outputToken} onChange={handleChange} style={{ width: '100%', padding: '8px' }} />
+        <input type="text" name="outputToken" value={formData.outputToken} onChange={handleChange} />
       </div>
-      <div>
+      <div className="field">
         <label>Output Amount:</label>
-        <input type="text" name="outputAmount" value={formData.outputAmount} onChange={handleChange} style={{ width: '100%', padding: '8px' }} />
+        <input type="text" name="outputAmount" value={formData.outputAmount} onChange={handleChange} />
       </div>
-      <div>
+      <div className="field">
         <label>Recipient Address:</label>
-        <input type="text" name="recipient" value={formData.recipient} onChange={handleChange} style={{ width: '100%', padding: '8px' }} />
+        <input type="text" name="recipient" value={formData.recipient} onChange={handleChange} />
       </div>
-      <button type="submit" disabled={loading} style={{ padding: '12px', fontSize: '16px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+      <button className="submit-button" type="submit" disabled={loading}>
         {loading ? 'Processing...' : 'Sign Intent & Submit'}
       </button>
 
       {statusMessage && (
-        <div style={{ marginTop: '15px', padding: '10px', background: '#f8fafc', borderLeft: '4px solid #10b981' }}>
-          <p style={{margin: 0 }}>{statusMessage}</p>
+        <div className="status">
+          <p>{statusMessage}</p>
         </div>
       )}
     </form>

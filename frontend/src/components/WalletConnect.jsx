@@ -17,13 +17,13 @@ export default function WalletConnect({ account, setAccount }) {
   };
 
   return (
-    <div style={{ marginBottom: '20px' }}>
+    <div className="wallet">
       {!account ? (
-        <button onClick={connectWallet} style={{ padding: '10px 20px', fontSize: '16px', cursor: 'pointer', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '5px' }}>
+        <button className="connect-button" onClick={connectWallet}>
           Connect MetaMask
         </button>
       ) : (
-        <p style={{ background: '#f1f5f9', padding: '10px', borderRadius: '5px' }}>
+        <p className="connected">
           <b>Connected:</b> {account}
         </p>
       )}
