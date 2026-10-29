@@ -55,6 +55,19 @@ async function startFullFlowSolverBot() {
                     continue;
                 }
 
+                const latestBlock = await sourceProvider.getBlock('latest');
+                if (BigInt(intent.deadline) <= latestBlock.timestamp) {
+                    console.log('Skipping intent ' + intent._id + ': deadline passed');
+                    try {
+                        await axios.patch(BACKEND_URL + '/intents/' + intent._id + '/status', {
+                            status: 'failed'
+                        });
+                    } catch (patchErr) {
+                        console.error('Failed to update status to failed:', patchErr.message);
+                    }
+                    continue;
+                }
+
                 console.log('\nProcessing Intent ID: ' + intent._id);
                 let destinationFilled = false;
 

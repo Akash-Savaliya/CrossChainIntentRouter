@@ -51,8 +51,7 @@ export default function IntentForm({ account }) {
     inputAmount: '1000000000000000',
     outputToken: '0x0000000000000000000000000000000000000000',
     outputAmount: '1000000',
-    recipient: '',
-    deadline: Math.floor(Date.now() / 1000) + 3600
+    recipient: ''
   });
 
   useEffect(() => {
@@ -86,7 +85,8 @@ export default function IntentForm({ account }) {
       setStatusMessage('Requesting EIP-712 Signature from MetaMask...');
       const signer = await provider.getSigner();
       const nonce = createNonce();
-      const intentToSign = { ...formData, user: account, nonce };
+      const deadline = Math.floor(Date.now() / 1000) + 3600;
+      const intentToSign = { ...formData, user: account, nonce, deadline };
 
       const signature = await signIntent(signer, intentToSign, intentToSign.sourceChainId);
       setStatusMessage('Signature generated successfully! Sending to backend...');
@@ -101,7 +101,7 @@ export default function IntentForm({ account }) {
         outputAmount: formData.outputAmount,
         recipient: formData.recipient,
         nonce,
-        deadline: Number(formData.deadline),
+        deadline,
         signature: signature
       };
 
